@@ -82,6 +82,11 @@ public final class Constants {
     public static final double driveBaseRadius = (Double) 0.51 * Math.sqrt(2); 
   }
 
+  public static class SampleConstants {
+    public static final int sampleNeo = 15;
+    public static final int sampleFlex = 59;
+  }
+
   public static class Auton {
     public static final PIDController X_Pos = new PIDController(1.3, 0, 0);
     public static final PIDController Y_Pos = new PIDController(1.3, 0, 0);
