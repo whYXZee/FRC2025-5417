@@ -5,7 +5,8 @@
 package frc.robot;
 
 
-import com.studica.frc.AHRS;
+import com.ctre.phoenix6.hardware.Pigeon2;
+
 import edu.wpi.first.hal.HALUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
@@ -15,7 +16,6 @@ import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
-
 import frc.robot.Constants.OperatorConstants;
 import frc.robot.commands.AutonLoader;
 import frc.robot.commands.TeleopDrive;
@@ -35,10 +35,10 @@ public class RobotContainer {
   // The robot's subsystems and commands are defined here...
 
 
-  public static AHRS ahrs = new AHRS(null);
+  public static Pigeon2 pigeon = new Pigeon2(59, "canivore");
 
-  public static Kinematics kinematics = new Kinematics(ahrs);
-  public static DriveBase driveBase = new DriveBase(kinematics, ahrs);
+  public static Kinematics kinematics = new Kinematics(pigeon);
+  public static DriveBase driveBase = new DriveBase(kinematics, pigeon);
   // public static Elevator elevator = new Elevator();
   public static Bezier bezier = new Bezier();
 

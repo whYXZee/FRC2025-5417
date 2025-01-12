@@ -1,7 +1,7 @@
 package frc.robot.subsystems;
 import java.util.function.Supplier;
 
-import com.studica.frc.AHRS;
+import com.ctre.phoenix6.hardware.Pigeon2;
 
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -21,7 +21,7 @@ public class DriveBase extends SubsystemBase {
 
     private static Module.ModuleState targetModuleStates[];
     private final Kinematics m_kinematics;
-    private final AHRS m_ahrs;
+    private final Pigeon2 m_pigeon;
 
     public static Module[] moduleGroup;
 
@@ -51,9 +51,6 @@ public class DriveBase extends SubsystemBase {
 
     ChassisSpeeds autoSetSpeed = new ChassisSpeeds();
 
-    private PIDController snapToNearestTheta = new PIDController(1, 0, 0);
-    private boolean snappingOn = false;
-
     private double[] chassisSpeed_pub = {0.0, 0.0, 0.0};
 
     public Supplier<double[]> chassisSpeed_supp = ()->chassisSpeed_pub;
@@ -63,9 +60,9 @@ public class DriveBase extends SubsystemBase {
     public Supplier<String> alliancecolor_supp = ()->alliancecolor_pub;
 
 
-    public DriveBase(Kinematics kinematics, AHRS ahrs) {
+    public DriveBase(Kinematics kinematics, Pigeon2 pigeon) {
         m_kinematics = kinematics;
-        m_ahrs = ahrs;
+        m_pigeon = pigeon;
 
         moduleGroup = new Module[4];
         for (int i = 0; i < 4; i++) {
@@ -80,7 +77,7 @@ public class DriveBase extends SubsystemBase {
             targetModuleStates[i] = new Module.ModuleState(0, Constants.ModuleConstants.motorDegrees[i] * (Math.PI/180));
 
         m_sdkOdom = new SwerveDriveOdometry(
-            m_skdKine, m_ahrs.getRotation2d(), new SwerveModulePosition[] {
+            m_skdKine, m_pigeon.getRotation2d(), new SwerveModulePosition[] {
                 new SwerveModulePosition(odomDeltas[2], new Rotation2d(odomAngles[2])),
                 new SwerveModulePosition(odomDeltas[0], new Rotation2d(odomAngles[0])),
                 new SwerveModulePosition(odomDeltas[3], new Rotation2d(odomAngles[3])),
@@ -132,7 +129,7 @@ public class DriveBase extends SubsystemBase {
                 new SwerveModulePosition(odomDeltas[3], new Rotation2d(odomAngles[3])),
                 new SwerveModulePosition(odomDeltas[1], new Rotation2d(odomAngles[1]))
         };
-        m_sdkOdom.resetPosition(m_ahrs.getRotation2d(), modulePositions, inverted);
+        m_sdkOdom.resetPosition(m_pigeon.getRotation2d(), modulePositions, inverted);
     }
 
     public void setHardStates(Module.ModuleState[] targetState) {
@@ -171,10 +168,6 @@ public class DriveBase extends SubsystemBase {
         }
     }
 
-    public void setSnapping(boolean on_or_off) {
-        snappingOn = on_or_off;
-    }
-
     @Override
     public void periodic() {
         for (int i = 0; i < 4; i++) {
@@ -183,17 +176,12 @@ public class DriveBase extends SubsystemBase {
             odomAngles[i] = smallestAngle(moduleGroup[i].getAngleInRadians());
         }
 
-        m_sdkOdom.update(m_ahrs.getRotation2d(), new SwerveModulePosition[] {
+        m_sdkOdom.update(m_pigeon.getRotation2d(), new SwerveModulePosition[] {
             new SwerveModulePosition(Math.abs(odomDeltas[2]), new Rotation2d(odomAngles[2])),
             new SwerveModulePosition(Math.abs(odomDeltas[0]), new Rotation2d(odomAngles[0])),
             new SwerveModulePosition(Math.abs(odomDeltas[3]), new Rotation2d(odomAngles[3])),
             new SwerveModulePosition(Math.abs(odomDeltas[1]), new Rotation2d(odomAngles[1]))
         });
-
-        if (snappingOn) {
-            snapToNearestTheta.setSetpoint(m_ahrs.getYaw()-(m_ahrs.getYaw()%90.0));
-            setDriveSpeed(RobotContainer.getSaturatedSpeeds(0, 0, snapToNearestTheta.calculate(m_ahrs.getYaw())));
-        }
         
         field.setRobotPose(getCurrentPose());
     }

@@ -6,7 +6,7 @@ package frc.robot.subsystems;
 
 import frc.robot.Constants;
 
-import com.studica.frc.AHRS;
+import com.ctre.phoenix6.hardware.Pigeon2;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 
 public class Kinematics {
@@ -15,12 +15,12 @@ public class Kinematics {
   private double[] theta = new double[4];
   public boolean fieldCentric;
   private double gyro = 0.0;
-  private final AHRS m_ahrs;
+  private final Pigeon2 m_pigeon;
 
 
-  public Kinematics(AHRS ahrs) {
+  public Kinematics(Pigeon2 pigeon) {
     this.fieldCentric = Constants.OperatorConstants.fieldCentric;
-    m_ahrs = ahrs;
+    m_pigeon = pigeon;
   }
 
   private double[][] computeStrafe(double joy_x, double joy_y) {
@@ -91,7 +91,7 @@ public class Kinematics {
     double targetAngVelRatio = targetChassisSpeed.omegaRadiansPerSecond; 
 
     if (fieldCentric) {
-      this.gyro = this.m_ahrs.getYaw();
+      this.gyro = this.m_pigeon.getYaw().getValueAsDouble();
       this.gyro *= Math.PI/180;
     } else {
       this.gyro = 0;
